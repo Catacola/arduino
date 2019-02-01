@@ -6,9 +6,10 @@
 #define NUM_LEDS    50
 #define BRIGHTNESS  200
 
-#define MAX_ON      6
-#define FPS         40
-#define CHANCE      98
+#define MAX_ON          100
+#define FPS             45
+#define CHANCE_ON       30
+#define CHANCE_REVERSE  5
 
 CRGB leds[NUM_LEDS];
 int num_on = 0;
@@ -24,7 +25,7 @@ void setup() {
 
 void loop() {
 
-  if (num_on < MAX_ON && random(100) > CHANCE) {
+  if (num_on < MAX_ON && random(100) > 99 - CHANCE_ON) {
     int new_light = random(NUM_LEDS);
     if (leds[new_light].b == 0) {
       leds[new_light].b = 1;
@@ -35,8 +36,10 @@ void loop() {
   for (int i = 0; i < NUM_LEDS; i++) {
     if (leds[i].b > 0) {
       if(leds[i].b % 2 == 1) {
-        leds[i].b += 2;
-        leds[i].b = min(leds[i].b, 254);
+        leds[i].b = qadd8(leds[i].b, 2);
+        if (random(1000) > 999 - CHANCE_REVERSE) {
+          leds[i].b--;
+        }
       } else {
         leds[i].b -= 2;
         if (leds[i].b == 0) {
