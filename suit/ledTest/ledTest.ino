@@ -3,8 +3,8 @@
   #include <avr/power.h>
 #endif
 
-#define PIN 10
-#define N_PIXELS 12
+#define PIN 5
+#define N_PIXELS 20
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = Arduino pin number (most are valid)
@@ -42,10 +42,10 @@ void loop() {
 //  // Send a theater pixel chase in...
 //  theaterChase(strip.Color(127, 127, 127), 50); // White
 //  theaterChase(strip.Color(127, 0, 0), 50); // Red
-  theaterChase(strip.Color(0, 0, 255), 1500); // Blue
+//  theaterChase(strip.Color(0, 0, 255), 1500); // Blue
 //
-//  rainbow(20);
-//  rainbowCycle(40);
+  //rainbow(20);
+  rainbowCycle(10);
 //  theaterChaseRainbow(50);
 }
 
