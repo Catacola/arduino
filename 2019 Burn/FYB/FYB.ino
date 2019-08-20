@@ -382,10 +382,6 @@ uint32_t currentEffectTime() {
   return millis() - gLastEffectStart;
 }
 
-void maybeGlitterLED(uint8_t index, uint8_t chance){
-  
-}
-
 uint8_t globalLetterNum(uint8_t index) {
   SignLED myLED = ledInfo[index];
   return myLED.let_num + myLED.word_num * 4;
