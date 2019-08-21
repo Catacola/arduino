@@ -13,12 +13,12 @@ CRGB leds[NUM_LEDS];
 #define BRIGHTNESS          64 // out of 255
 #define FRAMES_PER_SECOND  120
 
-#define MIN_EVENT_SPACING 45  // seconds
-#define MAX_EVENT_SPACING 150 // seconds
+#define MIN_EVENT_SPACING 25 //45  // seconds
+#define MAX_EVENT_SPACING 35 //150 // seconds
 
-#define FUCK_YOU_DURATION 18 // seconds
-#define HEART_YOU_DURATION 12 // seconds
-#define FUCK_OUR_BURN_DURATION 15 // seconds
+#define FUCK_YOU_DURATION 8 // seconds
+#define HEART_YOU_DURATION 8 // seconds
+#define FUCK_OUR_BURN_DURATION 8 // seconds
 
 #define MAX_SPARKLE_CHANCE 90
 #define MAX_SPARKLE_DISTANCE 5
@@ -212,6 +212,8 @@ const SignLED ledInfo[NUM_LEDS] = {
 void setup() {
   delay(3000); // 3 second delay for recovery
 
+  Serial.begin(57600);
+  
   // set a random random seed
   random16_set_seed(analogRead(0));
   
@@ -260,10 +262,10 @@ void basePattern()
  *********************************/
 
 void fuckYou() { 
-  if (flickerStep() % 2 == (currentEffectTime() < (FUCK_YOU_DURATION * 1000) ? 0 : 1)) {
+  if (flickerState(FUCK_YOU_DURATION * 1000)) {
     for(int i=0; i< NUM_LEDS; i++) {
       SignLED myLED = ledInfo[i];
-      if( myLED.word_num > 2 || (myLED.word_num == 1 && myLED.let_num == 3) ) {
+      if( myLED.word_num > 1 || (myLED.word_num == 1 && myLED.let_num == 3) ) {
         leds[i] = 0;
       }
     }
@@ -271,7 +273,7 @@ void fuckYou() {
 }
 
 void heartYou() {
-  if (flickerStep() % 2 == (currentEffectTime() < (HEART_YOU_DURATION * 1000) ? 0 : 1)) {
+  if (flickerState(HEART_YOU_DURATION * 1000)) {
     for(int i=0; i< NUM_LEDS; i++) {
       SignLED myLED = ledInfo[i];
       if( myLED.word_num % 2 == 0  || myLED.let_num == 3 ) {
@@ -282,10 +284,21 @@ void heartYou() {
 }
 
 void fuckOurBurn() {
-  if (flickerStep() % 2 == (currentEffectTime() < (FUCK_OUR_BURN_DURATION * 1000) ? 0 : 1)) {
+  if (flickerState(FUCK_OUR_BURN_DURATION * 1000)) {
     for(int i=0; i< NUM_LEDS; i++) {
       SignLED myLED = ledInfo[i];
-      if(( myLED.word_num == 1  && myLED.let_num == 3 ) || myLED.word_num == 3 ) {
+      if(( myLED.word_num == 1  && myLED.let_num == 0 ) || myLED.word_num == 3 ) {
+        leds[i] = 0;
+      }
+    }
+  }
+}
+
+void fuckYouBurn() {
+  if (flickerState(FUCK_OUR_BURN_DURATION * 1000)) {
+    for(int i=0; i< NUM_LEDS; i++) {
+      SignLED myLED = ledInfo[i];
+      if(( myLED.word_num == 1  && myLED.let_num == 0 ) || myLED.word_num == 3 ) {
         leds[i] = 0;
       }
     }
@@ -314,6 +327,8 @@ void sparkleWave() {
  ****************************************/
 
 void runEffect() {
+  Serial.print("effect ");
+  Serial.println(gCurrentEffect);
   switch (gCurrentEffect) {
     case 0:
       fuckYou();
@@ -364,18 +379,25 @@ void chooseEffectSpacing() {
  * Helpers
  ****************************************/
 
-uint8_t flickerStep() {
+bool flickerState(uint32_t effectTimeout) {
+  // returns true when flickered off
   uint32_t total_time = 0;
   int flicker_step;
 
-  uint32_t effectTime = currentEffectTime();  
+  uint32_t effectTime = currentEffectTime();
+  bool invert = effectTime > effectTimeout;
+  effectTime -= invert ? effectTimeout : 0;
+
+  Serial.println(invert ? "inverted" : "not");
   
   for(flicker_step = 0; flicker_step<ARRAY_SIZE(flicker_intervals); flicker_step++) {
     total_time += flicker_intervals[flicker_step];
     if ( total_time > effectTime ) {
-      return flicker_step;
+      Serial.println(flicker_step);
+      return flicker_step % 2 == (invert ? 1 : 0);
     }
   }
+  return !invert;
 }
 
 uint32_t currentEffectTime() {
