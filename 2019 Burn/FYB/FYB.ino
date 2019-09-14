@@ -10,15 +10,15 @@ const int flicker_intervals[] = {10, 20, 20, 240, 20, 40, 20, 100, 20, 20, 20, 2
 #define NUM_LEDS    150
 CRGB leds[NUM_LEDS];
 
-#define BRIGHTNESS          64 // out of 255
+#define BRIGHTNESS          40 // out of 255
 #define FRAMES_PER_SECOND  120
 
-#define MIN_EVENT_SPACING 25 //45  // seconds
-#define MAX_EVENT_SPACING 35 //150 // seconds
+#define MIN_EVENT_SPACING 60  // seconds
+#define MAX_EVENT_SPACING 150 // seconds
 
-#define FUCK_YOU_DURATION 8 // seconds
-#define HEART_YOU_DURATION 8 // seconds
-#define FUCK_OUR_BURN_DURATION 8 // seconds
+#define FUCK_YOU_DURATION 15 // seconds
+#define HEART_YOU_DURATION 15 // seconds
+#define FUCK_OUR_BURN_DURATION 15 // seconds
 
 #define MAX_SPARKLE_CHANCE 90
 #define MAX_SPARKLE_DISTANCE 5
@@ -212,7 +212,9 @@ const SignLED ledInfo[NUM_LEDS] = {
 void setup() {
   delay(3000); // 3 second delay for recovery
 
-  Serial.begin(57600);
+  #if DEBUG
+    Serial.begin(57600);
+  #endif
   
   // set a random random seed
   random16_set_seed(analogRead(0));
@@ -327,8 +329,11 @@ void sparkleWave() {
  ****************************************/
 
 void runEffect() {
-  Serial.print("effect ");
-  Serial.println(gCurrentEffect);
+  #if DEBUG
+    Serial.print("effect ");
+    Serial.println(gCurrentEffect);
+  #endif
+  
   switch (gCurrentEffect) {
     case 0:
       fuckYou();
@@ -359,10 +364,10 @@ void checkForNewEffect() {
 void chooseNewPattern() {
   uint8_t roll = random8(100);
 
-  if (roll < 60) {
+  if (roll < 80) {
     gCurrentEffect = 0;
-  } else if (roll < 80) {
-    gCurrentEffect = 3;
+  //} else if (roll < 80) {
+    //gCurrentEffect = 3;
   } else if (roll < 95) {
     gCurrentEffect = 1;
   } else {
@@ -388,12 +393,16 @@ bool flickerState(uint32_t effectTimeout) {
   bool invert = effectTime > effectTimeout;
   effectTime -= invert ? effectTimeout : 0;
 
-  Serial.println(invert ? "inverted" : "not");
+  #if DEBUG
+    Serial.println(invert ? "inverted" : "not");
+  #endif
   
   for(flicker_step = 0; flicker_step<ARRAY_SIZE(flicker_intervals); flicker_step++) {
     total_time += flicker_intervals[flicker_step];
     if ( total_time > effectTime ) {
-      Serial.println(flicker_step);
+      #if DEBUG
+        Serial.println(flicker_step);
+      #endif
       return flicker_step % 2 == (invert ? 1 : 0);
     }
   }
