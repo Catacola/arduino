@@ -1,6 +1,8 @@
 #include <FastLED.h>
 
 FASTLED_USING_NAMESPACE
+
+#define FASTLED_USE_GLOBAL_BRIGHTNESS 1
  
 #define LED_DATA_PIN 10                // choose the pin for the LED
 #define LED_CLK_PIN 11
@@ -9,7 +11,7 @@ FASTLED_USING_NAMESPACE
 #define NUM_LEDS    60
 CRGB leds[NUM_LEDS];
 
-#define BRIGHTNESS          70
+#define BRIGHTNESS          80
 #define FRAMES_PER_SECOND  120
 
 #define PIR_DEBOUNCE 3000
@@ -41,7 +43,7 @@ void loop(){
 
 void updateLEDs() {
   uint8_t ease_frac = easeFracFromPIR();
-  uint8_t brightness = 93 + (30 * ease_frac/255) + beatsin8(16, 0, 40 + (40 * ease_frac/255));
+  uint8_t brightness = 135 + (40 * ease_frac/255) + beatsin8(16, 0, 40 + (40 * ease_frac/255));
   CRGB color = CHSV(205 + (30 * ease_frac/255), 255, brightness);
   fill_solid(leds, NUM_LEDS, color);
 }
