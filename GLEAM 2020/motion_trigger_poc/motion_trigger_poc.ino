@@ -12,6 +12,8 @@ CRGB leds[NUM_LEDS];
 #define BRIGHTNESS          70
 #define FRAMES_PER_SECOND  120
 
+#define PIR_DEBOUNCE 3000
+
 #define PIR_PIN 6               // choose the input pin (for PIR sensor)
 
 int pirState = LOW;             // we start, assuming no motion detected
@@ -39,7 +41,7 @@ void loop(){
 
 void updateLEDs() {
   uint8_t ease_frac = easeFracFromPIR();
-  uint8_t brightness = 93 + (30 * ease_frac/255) + beatsin8(20, 0, 40 + (40 * ease_frac/255));
+  uint8_t brightness = 93 + (30 * ease_frac/255) + beatsin8(16, 0, 40 + (40 * ease_frac/255));
   CRGB color = CHSV(205 + (30 * ease_frac/255), 255, brightness);
   fill_solid(leds, NUM_LEDS, color);
 }
@@ -56,24 +58,57 @@ uint8_t easeFracFromPIR() {
   }
 }
 
+uint16_t lastPirValChange = 0;
+uint8_t lastPirVal = LOW;
+
 void checkPIR() {
-  char val = digitalRead(PIR_PIN);
+  uint8_t val = digitalRead(PIR_PIN);
+  uint16_t mils = millis();
+
+  /*Serial.print("val: ");
+  Serial.print(val);
+  Serial.print(", lastPirVal: ");
+  Serial.print(lastPirVal);
+  Serial.print(", lastPirValChange: ");
+  Serial.print(lastPirValChange);
+  Serial.print(", millis(): ");
+  Serial.print(mils);
+  Serial.print(", time since change: ");
+  Serial.println((mils - lastPirValChange));*/
+  
+
+  // Debounce
+  if (val != lastPirVal) {
+    lastPirValChange = mils;
+    lastPirVal = val;
+    return;
+  }
+
+  if ((mils - lastPirValChange) < PIR_DEBOUNCE) {
+    return;
+  }
+  
 
   if (val == HIGH) {  
     if (pirState == LOW) {
       printTime();
       Serial.println("Motion detected!");
       pirState = HIGH;
-      lastPirChange = millis();
+      updatePirChangeTime(mils);
+      
     }
   } else {
     if (pirState == HIGH){
       printTime();
       Serial.println("Motion ended!");
       pirState = LOW;
-      lastPirChange = millis();
+      updatePirChangeTime(mils); 
     }
   }
+}
+
+void updatePirChangeTime(uint16_t mils) {
+  lastPirChange = (lastPirChange - mils > 5120) ? mils : mils - (5120 - lastPirChange);
 }
 
 void printTime() {
