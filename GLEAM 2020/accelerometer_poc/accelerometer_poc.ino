@@ -43,7 +43,7 @@ CRGB leds[NUM_LEDS];
 
 #define BRIGHTNESS          80
 
-#define N_CALIBRATION_SAMPLES 100
+#define ACC_TRIG_THRESH     6000
 
 LSM303 compass;
 
@@ -83,7 +83,7 @@ void loop()
   Serial.println(mag);
   Serial.print(" ");
 
-  CRGB color = CHSV(mag < 1000 ? 220 : 30, 255, 80);
+  CRGB color = CHSV(mag < ACC_TRIG_THRESH ? 220 : 30, 255, 80);
   fill_solid(leds, NUM_LEDS, color);
 
   prevX = compass.a.x;
