@@ -14,7 +14,8 @@ CRGB leds[NUM_LEDS];
 #define BRIGHTNESS          80
 #define FRAMES_PER_SECOND  120
 
-#define PIR_DEBOUNCE 3000
+#define PIR_DEBOUNCE_ON 3000
+#define PIR_DEBOUNCE_OFF 15000
 
 #define PIR_PIN 6               // choose the input pin (for PIR sensor)
 
@@ -86,7 +87,7 @@ void checkPIR() {
     return;
   }
 
-  if ((mils - lastPirValChange) < PIR_DEBOUNCE) {
+  if ((mils - lastPirValChange) < (pirState == LOW ? PIR_DEBOUNCE_ON : PIR_DEBOUNCE_OFF)) {
     return;
   }
   
